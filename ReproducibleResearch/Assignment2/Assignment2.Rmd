@@ -122,6 +122,7 @@ p3 <- ggplot(property,aes(EVTYPE,PROP)) + geom_bar(stat = "identity") +
 p4 <- ggplot(crops,aes(EVTYPE,CROP)) + geom_bar(stat = "identity") +
     labs(x = "Weather Event",y = "US Dollars (in Millions)") +
     theme(axis.text.x = element_text(angle=45,hjust=1))
+
 grid.arrange(p3,p4,ncol =2, top = "Economic Impact due to top 10 Weather Events.")
 
 ```
