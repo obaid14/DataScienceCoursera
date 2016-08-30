@@ -26,13 +26,25 @@ ggplot(step_day,aes(date,steps)) + geom_bar(stat = "identity") +
 ```
 
 ![plot of chunk unnamed-chunk-2](figure/unnamed-chunk-2-1.png)
+
 The mean and median number of steps taken each day is given by
 
 ```r
 # Finding the average number of steps taken each day
-mean_day <- aggregate(steps ~ date, act, mean)
+mean(step_day$steps)
+```
+
+```
+## [1] 9354.23
+```
+
+```r
 # Finding the median number of steps taken each day
-median_day <- aggregate(steps ~ date, act, median)
+median(step_day$steps)
+```
+
+```
+## [1] 10395
 ```
 
 ## What is the average daily activity pattern?
@@ -48,16 +60,16 @@ ggplot(interval_step, aes(interval,steps)) + geom_line() +
 ```
 
 ![plot of chunk unnamed-chunk-4](figure/unnamed-chunk-4-1.png)
+
 The maximum number of steps taken in an interval is given by
 
 ```r
 # Finding the interval with the max average number of steps taken
-interval_step[interval_step$interval == max(interval_step$interval),]
+interval_step$interval[which.max(interval_step$steps)]
 ```
 
 ```
-##     interval     steps
-## 288     2355 0.9344262
+## [1] 835
 ```
 
 ## Imputing missing values
