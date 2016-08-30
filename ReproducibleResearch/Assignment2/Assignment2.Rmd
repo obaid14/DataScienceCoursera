@@ -1,0 +1,134 @@
+# Peer Assignment 2
+
+## Impact of Weather Events on Health and Economy
+
+### Synopsis
+Our aim is to analyze the impact of different weather events on public health and economy based on the storm database collected from the U.S. National Oceanic and Atmospheric Administrations (NOAA) from 1950 - 2011. We will use the estimates of fatalities, injuries, property and crop damage to decide which types of event are most harmful to the population health and economy. From these data, we found that excessive heat and tornado are most harmful with respect to population health, while flood, drought, and hurricane/typhoon have the greatest economic consequences.
+```{r}
+library(ggplot2)
+library(gridExtra)
+```
+
+### Data Processing
+First we read the data and look at its dimensions.
+
+```{r cache=TRUE}
+storm_data <- read.csv("StormData.csv", header = TRUE, sep = ",")
+dim(storm_data)
+```
+
+We find that that storm data has 902297 observations of 37 variables. The events in the database start in the year 1950 and end in November 2011. In the earlier years of the database there are generally fewer events recorded, most likely due to a lack of good records. More recent years should be considered more complete.
+
+#### Impact on Public Health
+
+We want to find the impact weather events have had on the health of the population based on the data available. In this dataset, we find the Weather Event is given by the variable EVTYPE and the data required to find the health impact can be taken from FATALITIES and INJURIES variables.
+So, we will take only this data which will help us analyze the health impact of the Weather events.
+
+```{r}
+storm_data$EVTYPE <- as.factor(storm_data$EVTYPE)
+health_impact <- storm_data[,c(8,23,24,37)]
+```
+
+Now, we aggrgate the fatalities and the injuries by the weather event. Since, Weather event variable is a factor, we group all of them together and find the sum of fatalities and injuries that have occured since 1950 and 2011. We use the aggregate function for this.
+
+```{r}
+Fat_health <- aggregate(FATALITIES ~ EVTYPE, health_impact, sum)
+Fat_health <- Fat_health[order(Fat_health$FATALITIES,decreasing = TRUE),]
+Inj_health <- aggregate(INJURIES ~ EVTYPE, health_impact, sum)
+Inj_health <- Inj_health[order(Inj_health$INJURIES,decreasing = TRUE),]
+
+```
+
+So we have aggregated the fatalities and injuries, and also sorted them. We are interested in the weather events that have had the most impact on human health. For this, we take the 10 most severe events from our list of fatalities and injuries.
+We see that there are abouut 985 different fatalities and injuries, ouut of which the top 10 contribute most to the human health, hence, we are interested in looking at these top 10 only.
+
+```{r}
+Fatalities <- Fat_health[1:10,]
+Injuries <- Inj_health[1:10,]
+
+```
+
+To better see our results, lets plot a graph for both fatalities and injuries.
+```{r}
+p1 <- ggplot(Fatalities,aes(EVTYPE,FATALITIES)) + geom_bar(stat = "identity") +
+    labs(x = "Weather Event",y = "Number of Fatalities") +
+    theme(axis.text.x = element_text(angle=45,hjust = 1))
+
+
+p2 <- ggplot(Injuries,aes(EVTYPE,INJURIES)) + geom_bar(stat = "identity") +
+    labs(x = "Weather Event",y = "Number of Injuries") +
+    theme(axis.text.x = element_text(angle=45,hjust=1))
+
+grid.arrange(p1,p2,ncol =2, top = "Impact on Human health due to top 10 Weather Events")
+
+```
+
+#### Impact on Economy
+
+To find out the impact on economy, we look at the variables named PROPDMG, PROPDMGEXP, CROPDMG and CROPDMGEXP. Theses variables correspond to the loss in property and crops in dollar amounts. We will simple multiply the PROPDMG variable with the PROPDMGEXP, which is a multiplier, to find the actual cost. Similarly for the CROPDMG and CROPDMGEXP. We find that, some of the values in PROPDMGEXP and CROPDGMEXP are not numeric, so we convert them to nuumeric form, like 'k' corresponds to 1000, 'm' corresponds to a million and so on. Also, we find that there are some values with '?','+','-' values, we will replace them with 1, so that the cost is not 0.
+
+```{r results = "hide"}
+eco_data <- storm_data[,c(8,25,26,27,28)]
+unique(eco_data$PROPDMGEXP)
+unique(eco_data$CROPDMGEXP)
+eco_data$PROPDMGEXP <- as.character(eco_data$PROPDMGEXP)
+eco_data[!is.na(eco_data$PROPDMGEXP) & eco_data$PROPDMGEXP == '+',]$PROPDMGEXP <- 1
+eco_data[!is.na(eco_data$PROPDMGEXP) & eco_data$PROPDMGEXP == '?',]$PROPDMGEXP <- 1
+eco_data[!is.na(eco_data$PROPDMGEXP) & eco_data$PROPDMGEXP == '-',]$PROPDMGEXP <- 1
+eco_data[!is.na(eco_data$PROPDMGEXP) & eco_data$PROPDMGEXP == '',]$PROPDMGEXP <- 1
+eco_data[!is.na(eco_data$PROPDMGEXP) & eco_data$PROPDMGEXP == 'h',]$PROPDMGEXP <- 100
+eco_data[!is.na(eco_data$PROPDMGEXP) & eco_data$PROPDMGEXP == 'H',]$PROPDMGEXP <- 100
+eco_data[!is.na(eco_data$PROPDMGEXP) & eco_data$PROPDMGEXP == 'K',]$PROPDMGEXP <- 1000
+eco_data[!is.na(eco_data$PROPDMGEXP) & eco_data$PROPDMGEXP == 'M',]$PROPDMGEXP <- 1000000
+eco_data[!is.na(eco_data$PROPDMGEXP) & eco_data$PROPDMGEXP == 'B',]$PROPDMGEXP <- 1000000000
+eco_data$PROPDMGEXP <- as.numeric(eco_data$PROPDMGEXP)
+
+
+eco_data$CROPDMGEXP <- as.character(eco_data$CROPDMGEXP)
+eco_data[!is.na(eco_data$CROPDMGEXP) & eco_data$CROPDMGEXP == '',]$CROPDMGEXP <- 1
+eco_data[!is.na(eco_data$CROPDMGEXP) & eco_data$CROPDMGEXP == '?',]$CROPDMGEXP <- 1
+eco_data[!is.na(eco_data$CROPDMGEXP) & eco_data$CROPDMGEXP == 'k',]$CROPDMGEXP <- 1000
+eco_data[!is.na(eco_data$CROPDMGEXP) & eco_data$CROPDMGEXP == 'K',]$CROPDMGEXP <- 1000
+eco_data[!is.na(eco_data$CROPDMGEXP) & eco_data$CROPDMGEXP == 'M',]$CROPDMGEXP <- 1000000
+eco_data[!is.na(eco_data$CROPDMGEXP) & eco_data$CROPDMGEXP == 'm',]$CROPDMGEXP <- 1000000
+eco_data[!is.na(eco_data$CROPDMGEXP) & eco_data$CROPDMGEXP == 'B',]$CROPDMGEXP <- 1000000000
+
+eco_data$CROPDMGEXP <- as.numeric(eco_data$CROPDMGEXP)
+
+eco_data$PROP <- eco_data$PROPDMG*eco_data$PROPDMGEXP
+eco_data$CROP <- eco_data$CROPDMG*eco_data$CROPDMGEXP
+```
+
+Now we aggregate the property damages and crop damages by the weatehr event and then sort them in ascending order. Again, the we chose the top 10 weather events that have the most impact on economy and try to visualize this on a graph.
+
+```{r}
+eco_prop <- aggregate(PROP ~ EVTYPE, eco_data, sum)
+eco_crop <- aggregate(CROP ~ EVTYPE, eco_data, sum)
+
+eco_prop <- eco_prop[order(eco_prop$PROP,decreasing = TRUE),]
+eco_crop <- eco_crop[order(eco_crop$CROP,decreasing = TRUE),]
+
+crops <- eco_crop[1:10,]
+crops$CROP <- crops$CROP/1000000
+property <- eco_prop[1:10,]
+property$PROP <- property$PROP/1000000
+
+
+p3 <- ggplot(property,aes(EVTYPE,PROP)) + geom_bar(stat = "identity") +
+    labs(x = "Weather Event",y = "US Dollars (in Millions)") +
+    theme(axis.text.x = element_text(angle=45,hjust=1))
+
+
+p4 <- ggplot(crops,aes(EVTYPE,CROP)) + geom_bar(stat = "identity") +
+    labs(x = "Weather Event",y = "US Dollars (in Millions)") +
+    theme(axis.text.x = element_text(angle=45,hjust=1))
+grid.arrange(p3,p4,ncol =2, top = "Economic Impact due to top 10 Weather Events.")
+
+```
+
+### Results
+
+We can see from the first graph that, Tornado and Excessive Heat are the two most harmful Weather events that have severe impact on human health.
+
+We also see from the second one that Drought and Floods are the two weather events that have the most severe impact on the economy.
+
