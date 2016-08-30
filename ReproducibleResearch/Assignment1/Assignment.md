@@ -79,7 +79,7 @@ Now we will replace these rows with the mean for that interval
 # Replacing all NA with the average steps taken in that interval
 for( i in 1:nrow(with_na)){
     if(is.na(with_na$steps[i])){
-        with_na$steps <- interval_step[which(with_na$interval[i]==interval_step$interval),]$steps
+        with_na$steps[i] <- interval_step[which(with_na$interval[i]==interval_step$interval),]$steps
     }
 }
 ```
@@ -112,20 +112,9 @@ First, we convert the date variable into the weekday that it represents.
 
 ```r
 # Making the date variable as factor
-with_na$date <- as.Date(with_na)
-```
-
-```
-## Error in as.Date.default(with_na): do not know how to convert 'with_na' to class "Date"
-```
-
-```r
+with_na$date <- as.Date(with_na$date)
 # Adding a new column which will have the weekday
 with_na$weekday <- weekdays(with_na$date)
-```
-
-```
-## Error in UseMethod("weekdays"): no applicable method for 'weekdays' applied to an object of class "factor"
 ```
 Now, we classify the weekdays into weekday or weekend.
 
@@ -137,40 +126,22 @@ with_na[i,]$weekday <- "Weekday"
 else
 with_na[i,]$weekday <- "Weekend"
 }
-```
 
-```
-## Error in if (with_na[i, ]$weekday %in% c("Monday", "Tuesday", "Wednesday", : argument is of length zero
-```
-
-```r
 # Making the weekday variable as factor
 with_na$weekday <- as.factor(with_na$weekday)
-```
-
-```
-## Error in `$<-.data.frame`(`*tmp*`, "weekday", value = structure(integer(0), .Label = character(0), class = "factor")): replacement has 0 rows, data has 17568
 ```
 Finally plotting a graph that shows the steps taken on weekday's and weekend's against the interval
 
 ```r
 # Finding the average steps based on the intervals
-int_steps <- aggregate(steps~interval+weekday,d,mean)
-```
+int_steps <- aggregate(steps~interval+weekday,with_na,mean)
 
-```
-## Error in eval(expr, envir, enclos): object 'd' not found
-```
-
-```r
 # Plotting the panel plot of number of steps in each interval 
 # factored by weekdays and weekends
 ggplot(int_steps,aes(interval,steps)) + geom_line() + facet_grid(weekday ~ .) 
 ```
 
-```
-## Error in ggplot(int_steps, aes(interval, steps)): object 'int_steps' not found
-```
+![plot of chunk unnamed-chunk-12](figure/unnamed-chunk-12-1.png)
 
 ```r
 + labs(title = "Steps taken averaged over weekdays and weekends", 

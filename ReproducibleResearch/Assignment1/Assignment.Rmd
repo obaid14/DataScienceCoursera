@@ -61,7 +61,7 @@ Now we will replace these rows with the mean for that interval
 # Replacing all NA with the average steps taken in that interval
 for( i in 1:nrow(with_na)){
     if(is.na(with_na$steps[i])){
-        with_na$steps <- interval_step[which(with_na$interval[i]==interval_step$interval),]$steps
+        with_na$steps[i] <- interval_step[which(with_na$interval[i]==interval_step$interval),]$steps
     }
 }
 ```
@@ -89,7 +89,7 @@ modified_meidan <- aggregate(steps ~ date, with_na, median)
 First, we convert the date variable into the weekday that it represents.
 ```{r}
 # Making the date variable as factor
-with_na$date <- as.Date(with_na)
+with_na$date <- as.Date(with_na$date)
 # Adding a new column which will have the weekday
 with_na$weekday <- weekdays(with_na$date)
 ```
@@ -109,7 +109,7 @@ with_na$weekday <- as.factor(with_na$weekday)
 Finally plotting a graph that shows the steps taken on weekday's and weekend's against the interval
 ```{r}
 # Finding the average steps based on the intervals
-int_steps <- aggregate(steps~interval+weekday,d,mean)
+int_steps <- aggregate(steps~interval+weekday,with_na,mean)
 
 # Plotting the panel plot of number of steps in each interval 
 # factored by weekdays and weekends
