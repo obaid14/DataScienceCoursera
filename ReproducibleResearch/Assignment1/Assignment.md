@@ -138,17 +138,7 @@ int_steps <- aggregate(steps~interval+weekday,with_na,mean)
 
 # Plotting the panel plot of number of steps in each interval 
 # factored by weekdays and weekends
-ggplot(int_steps,aes(interval,steps)) + geom_line() + facet_grid(weekday ~ .) 
+ggplot(int_steps,aes(interval,steps)) + geom_line() + facet_grid(weekday ~ .) + labs(title = "Steps taken averaged over weekdays and weekends", x = "Interval" , y = "Number of Steps")
 ```
 
 ![plot of chunk unnamed-chunk-12](figure/unnamed-chunk-12-1.png)
-
-```r
-+ labs(title = "Steps taken averaged over weekdays and weekends", 
-x = "Interval" , 
-y = "Number of Steps")
-```
-
-```
-## Error in +labs(title = "Steps taken averaged over weekdays and weekends", : invalid argument to unary operator
-```

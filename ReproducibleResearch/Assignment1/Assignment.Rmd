@@ -113,8 +113,6 @@ int_steps <- aggregate(steps~interval+weekday,with_na,mean)
 
 # Plotting the panel plot of number of steps in each interval 
 # factored by weekdays and weekends
-ggplot(int_steps,aes(interval,steps)) + geom_line() + facet_grid(weekday ~ .) 
-+ labs(title = "Steps taken averaged over weekdays and weekends", 
-x = "Interval" , 
-y = "Number of Steps")
+ggplot(int_steps,aes(interval,steps)) + geom_line() + facet_grid(weekday ~ .) + labs(title = "Steps taken averaged over weekdays and weekends", x = "Interval" , y = "Number of Steps")
+
 ```
